@@ -2,5 +2,5 @@ eval
 *.txt
 *.png
 *.sql
-.DS_Store
-.vscode
+*.DS_Store
+*.vscode
