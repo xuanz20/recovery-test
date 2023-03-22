@@ -19,7 +19,8 @@ server_pid=$!
 
 trap "shut_server" EXIT
 
-./eval $user $password 0.9 throughput_0.9.txt
-./eval $user $password 0.5 throughput_0.5.txt
+./eval $user $password 0.5 throughput_5.txt
+
+./eval $user $password 0.9 throughput_9.txt
 
 kill $server_pid

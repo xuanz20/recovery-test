@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-with open("throughput_0.5.txt") as f:
+with open("throughput_5.txt") as f:
     result = [float(line.strip()) for line in f]
 
 plt.figure(1)
@@ -10,7 +10,7 @@ plt.xlabel("seconds")
 plt.ylabel("throughput")
 plt.savefig("50%read_50%update.png")
 
-with open("throughput_0.9.txt") as f:
+with open("throughput_9.txt") as f:
     result = [float(line.strip()) for line in f]
 
 plt.figure(2)

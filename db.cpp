@@ -12,7 +12,7 @@ sess(mysqlx::Session("localhost", 33060, user, pass)), redis_conn(sw::redis::Red
     sess.sql("USE test_db").execute();
     sess.sql("DROP TABLE IF EXISTS booklist").execute();
     sess.sql(
-        "CREATE TABLE IF NOT EXISTS booklist (name VARCHAR(10), ISBN VARCHAR(20), PRIMARY KEY (name))"
+        "CREATE TABLE IF NOT EXISTS booklist (name VARCHAR(32), ISBN VARCHAR(96), PRIMARY KEY (name))"
     ).execute();
     // sess.sql("SET GLOBAL innodb_log_file_size = 8589934592").execute();
     std::ifstream file("./data.sql");
