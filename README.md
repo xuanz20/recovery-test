@@ -13,7 +13,7 @@ To run the codes in this repo, you should have the following:
 
 ## Notices:
 
-+ Since we need to test Redis recovery performance, we need to disable Redis persistence, which can done by setting `set ""` in `redis.conf`.
++ Since we need to test Redis recovery performance, we need to disable Redis persistence, which can be done by setting `set ""` in `redis.conf`.
 + To use MySQL Connector/C++ x DevAPI, we need X Plugin enabled for MySQL, which is by default in MySQL 8.
 
 ## Usage:
