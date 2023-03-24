@@ -30,7 +30,7 @@ To run the codes in this repo, you should have the following:
 
 ## Result:
 
-The current data size is about 128MB with 1M key-value pairs, each pair 128B.
+The current data size is about 512MB with 2M key-value pairs, each pair 256B.
 
 ### 50%read, 50%update, RDB off:
 ![50%read_50%update_noRDB](https://github.com/xuanz20/recovery-test/blob/main/result/50%25read_50%25update_noRDB.png?raw=true)
@@ -44,12 +44,15 @@ The current data size is about 128MB with 1M key-value pairs, each pair 128B.
 ### 90%read, 10%update, RDB on:
 ![90%read_10%update_RDB](https://github.com/xuanz20/recovery-test/blob/main/result/90%25read_10%25update_RDB.png?raw=true)
 
-We crash the redis server at 30 secs, 1 min, 2 min and 4 min.
+We crash the redis server at 1 min, 2 min and 4 min.
 
 ## Conclusions:
 
 + The recovery time is close to warm-up time, which is quite long(about 200 seconds).
+
 + The experiment result is more stable with 90% read, 10% update than 50% read, 50% update.
+
++ With RDB on, the performance drop comes mainly from the black out time, and the recovery performance is high.
 
 ## Week Plan:
 
