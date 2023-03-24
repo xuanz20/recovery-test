@@ -54,8 +54,10 @@ We crash the redis server at 1 min, 2 min and 4 min.
 
 + With RDB on, the performance drop comes mainly from the black out time, and the recovery performance is high.
 
++ The throughput has several drops between the crashes. After examineing the redis log, it may due to the cost of saving RDB file on disk and forking new process for background saving. Note that by default, Redis will save the DB about every 1 minute and 5 minute.
+
 ## Week Plan:
 
-+ Try to crash at longer time-intervals so that the system can fully warm up.
++ Retest the experiment. The DB loading time is longer than I expected and I reconnect to the server before it actually finishes loading, which makes the program abort. 
 
 + Test it with Phoenix as frontend.
