@@ -1,7 +1,8 @@
-#define key_len 32
-#define value_len 96
-#define data_size 1000000
+#define key_len 64
+#define value_len 192
+#define data_size 2000000
 #include "db.h"
+#include "utils.h"
 #include <assert.h>
 #include <cstdlib>
 #include <iostream>
@@ -12,6 +13,10 @@
 #include <set>
 #include <iterator>
 
+std::string conf_path = "/opt/homebrew/etc/redis.conf";
+std::string log_path = "/opt/homebrew/var/db/redis/redis.log";
+std::string dump_path = "/opt/homebrew/var/db/redis/dump.rdb";
+
 void run(
     double,
     std::string*,
@@ -21,48 +26,51 @@ void run(
     int
 );
 
-void crash(DB*, int);
+void crash(
+    double,
+    std::string*,
+    DB*, 
+    std::map<std::string, std::string>*,
+    int, 
+    std::ofstream*,
+    bool);
 
 int main(int argc, char *argv[]) {
-    auto db = new DB(argv[1], argv[2]);
-    double true_rate = atof(argv[3]);
+    clean_history(dump_path, log_path);
+    start_server(conf_path);
+    bool rdb = atoi(argv[3]);
+    auto db = new DB(argv[1], argv[2], rdb);
+    double true_rate = atof(argv[4]);
     auto test_db = new std::map<std::string, std::string>;
     std::string line, name, isbn;
-    // std::set<std::string> name_list;
     std::ifstream init("init.txt");
-    std::ifstream read("name.txt");
     std::ofstream fout;
-    fout.open(argv[4]);
+    fout.open(argv[5]);
     double time = 0;
+    auto name_list = new std::string [data_size];
+    int i = 0;
 
     while(getline(init, line)) {
         name = line.substr(0, key_len);
         isbn = line.substr(key_len + 1, value_len);
         test_db->insert(make_pair(name, isbn));
-    }
-
-    // std::string name_list[data_size];
-    auto name_list = new std::string [data_size];
-    int i = 0;
-    while(getline(read, line)) {
-        name = line.substr(0, key_len);
-        // name_list.insert(name);
         name_list[i] = name;
         i++;
     }
 
     std::cout << "Loading finishes!" << std::endl;
 
-    run(true_rate, name_list, db, test_db, &fout, 30);
-    crash(db, 30);
-    run(true_rate, name_list, db, test_db, &fout, 30);
-    crash(db, 60);
     run(true_rate, name_list, db, test_db, &fout, 60);
-    crash(db, 120);
+    crash(true_rate, name_list, db, test_db, 60, &fout, rdb);
+    run(true_rate, name_list, db, test_db, &fout, 60);
+    crash(true_rate, name_list, db, test_db, 120, &fout, rdb);
     run(true_rate, name_list, db, test_db, &fout, 120);
-    crash(db, 240);
+    crash(true_rate, name_list, db, test_db, 240, &fout, rdb);
     run(true_rate, name_list, db, test_db, &fout, 240);
+    crash(true_rate, name_list, db, test_db, 480, &fout, rdb);
+    run(true_rate, name_list, db, test_db, &fout, 480);
 
+    shut_server();
     fout.close();
     return 0;
 }
@@ -119,6 +127,25 @@ bool random_bool(double true_rate) {
     return d(gen);
 }
 
+void operation(
+    double true_rate,
+    std::string *name_list,
+    DB *db, 
+    std::map<std::string, std::string> *test_db,
+    double *start
+) {
+    if (random_bool(true_rate)) { // read operation
+        // std::cout << "get operation" << std::endl;
+        std::string name = get_random_name(name_list);
+        *start += get(db, test_db, name).count();
+    } else { // update operation
+        // std::cout << "set operation" << std::endl;
+        std::string name = get_random_name(name_list);
+        std::string isbn = generate_isbn();
+        *start += set(db, test_db, name, isbn).count();
+    }
+}
+
 void eval(
     double true_rate,
     std::string *name_list,
@@ -127,21 +154,11 @@ void eval(
     std::ofstream *fout
 ) {
     int sec = 0;
-    std::string name, isbn, line;
     double time = 0;
     int num = 0;
     while (time < 1) {
         num++;
-        if (random_bool(true_rate)) { // read operation
-            // std::cout << "get operation" << std::endl;
-            name = get_random_name(name_list);
-            time += get(db, test_db, name).count();
-        } else { // update operation
-            // std::cout << "set operation" << std::endl;
-            name = get_random_name(name_list);
-            isbn = generate_isbn();
-            time += set(db, test_db, name, isbn).count();
-        }
+        operation(true_rate, name_list, db, test_db, &time);
     }
     *fout << num << std::endl;
 }
@@ -159,12 +176,32 @@ void run(
     }
 }
 
-void crash(DB* db, int sec) {
+void crash(
+    double true_rate,
+    std::string *name_list,
+    DB* db,
+    std::map<std::string, std::string> *test_db,
+    int sec, 
+    std::ofstream *fout,
+    bool rdb
+) {
     try {
         db->crash();
     } catch (...) {
-        std::cout << "Crash at " << sec << "seconds!" << std::endl;
-        db->recovery();
-        std::cout << "Recovery finishes at " << sec << "seconds!" << std::endl;
+        std::cout << "Crash at " << sec << " seconds!" << std::endl;
+        db->recovery(rdb);
+        std::cout << "Recovery finishes at " << sec << " seconds!" << std::endl;
+        double time = get_DB_load_time(log_path);
+        std::cout << "DB loaded from disk: " << time << " seconds" << std::endl;
+        while (time >= 1) {
+            *fout << 0 << std::endl;
+            time -= 1;
+        }
+        int num = 0;
+        while (time < 1) {
+            num++;
+            operation(true_rate, name_list, db, test_db, &time);
+        }
+        *fout << num << std::endl;
     }
 } 

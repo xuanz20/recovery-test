@@ -1,27 +1,30 @@
 #include "db.h"
+#include "utils.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <chrono>
 #include <thread>
 
-DB::DB(std::string user, std::string pass): 
+extern std::string conf_path;
+
+DB::DB(std::string user, std::string pass, bool rdb = false): 
 sess(mysqlx::Session("localhost", 33060, user, pass)), redis_conn(sw::redis::Redis("tcp://127.0.0.1:6379"))
 {
     sess.sql("CREATE DATABASE IF NOT EXISTS test_db").execute();
     sess.sql("USE test_db").execute();
     sess.sql("DROP TABLE IF EXISTS booklist").execute();
     sess.sql(
-        "CREATE TABLE IF NOT EXISTS booklist (name VARCHAR(32), ISBN VARCHAR(96), PRIMARY KEY (name))"
+        "CREATE TABLE IF NOT EXISTS booklist (name CHAR(64), ISBN CHAR(192), PRIMARY KEY (name))"
     ).execute();
-    // sess.sql("SET GLOBAL innodb_log_file_size = 8589934592").execute();
     std::ifstream file("./data.sql");
     std::string line;
     while(getline(file, line)) {
         sess.sql(line).execute();
     }
     redis_conn.flushdb();
-    redis_conn.command("CONFIG", "SET", "save", "");
+    if (!rdb)
+        redis_conn.command("CONFIG", "SET", "save", "");
 }
 
 std::string DB::get(std::string name)
@@ -55,20 +58,12 @@ void DB::crash()
     redis_conn.command<std::string>("SHUTDOWN");
 }
 
-void DB::recovery()
+void DB::recovery(bool rdb = false)
 {
-    while (true) {
-        redisContext* context = redisConnect("localhost", 6379);
-        if (context != NULL && context->err == 0) {
-            redisFree(context);
-            break;
-        }
-        std::cout << "Waiting for Redis server to be set up..." << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    }
-        std::cout << "Connection restarts!" << std::endl;
+    start_server(conf_path);
     redis_conn = sw::redis::Redis("tcp://127.0.0.1:6379");
-    redis_conn.command("CONFIG", "SET", "save", "");
+    if (!rdb)
+        redis_conn.command("CONFIG", "SET", "save", "");
 }
 
 DB::~DB()

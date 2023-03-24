@@ -1,26 +1,7 @@
 user=$1
 password=$2 
 
-function shut_server() {
-    kill $server_pid
-    sleep 1
-    exit
-}
-
-while true
-do
-    redis-server &
-    wait $!
-    echo ""
-    sleep 1
-done &
-
-server_pid=$!
-
-trap "shut_server" EXIT
-
-./eval $user $password 0.5 throughput_5.txt
-
-./eval $user $password 0.9 throughput_9.txt
-
-kill $server_pid
+./eval $user $password 0 0.5 throughput_5_noRDB.txt
+./eval $user $password 0 0.9 throughput_9_noRDB.txt
+./eval $user $password 1 0.5 throughput_5_RDB.txt
+./eval $user $password 1 0.9 throughput_9_RDB.txt

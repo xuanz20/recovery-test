@@ -1,17 +1,17 @@
 import random
 import string
 
-NUM = 1000000
+NUM = 2000000
 
 def generate_name(existing_names):
     while True:
-        name_length = 32
+        name_length = 64
         name = ''.join(random.choices(string.ascii_letters + string.digits, k=name_length))
         if name not in existing_names:
             return name
 
 def generate_isbn():
-    isbn = ''.join(random.choices(string.digits, k=96))
+    isbn = ''.join(random.choices(string.digits, k=192))
     return isbn
 
 book_names = set()
@@ -29,7 +29,3 @@ with open("data.sql", "w") as file:
 with open("init.txt", "w") as file:
     for name, isbn in book_pairs:
         file.write(f'{name},{isbn}\n')
-
-with open("name.txt", "w") as file:
-    for name in book_names:
-        file.write(f'{name}\n')

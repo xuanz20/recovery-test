@@ -9,11 +9,11 @@ class DB {
         mysqlx::Session sess;
         sw::redis::Redis redis_conn;
     public:
-        DB(std::string, std::string);
+        DB(std::string, std::string, bool);
         std::string get(std::string);
         void set(std::string, std::string);
         void crash();
-        void recovery();
+        void recovery(bool);
         ~DB();
 };
 

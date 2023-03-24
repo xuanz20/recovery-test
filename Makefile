@@ -4,7 +4,7 @@ LDLIBS = -lmysqlcppconn8 /usr/local/lib/libredis++.a /usr/local/lib/libhiredis.a
 CXX = clang++ -stdlib=libc++
 CXXFLAGS = -std=c++17 -pthread
 
-eval : db.cpp eval.cpp
+eval : db.cpp eval.cpp utils.cpp
 
 .PHONY : clean
 clean :
