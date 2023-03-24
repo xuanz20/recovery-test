@@ -32,13 +32,17 @@ To run the codes in this repo, you should have the following:
 
 The current data size is about 128MB with 1M key-value pairs, each pair 128B.
 
-### 90%read, 10% update:
+### 50%read, 50%update, RDB off:
+![50%read_50%update_noRDB](https://github.com/xuanz20/recovery-test/blob/main/result/50%25read_50%25update_noRDB.png?raw=true)
 
-![90%read_10%update](https://i.postimg.cc/cC552LZ2/90-read-10-update.png)
+### 90%read, 10%update, RDB off:
+![90%read_10%update_noRDB](https://github.com/xuanz20/recovery-test/blob/main/result/90%25read_10%25update_noRDB.png?raw=true)
 
-### 50%read, 50%update:
+### 50%read, 50%update, RDB on:
+![50%read_50%update_RDB](https://github.com/xuanz20/recovery-test/blob/main/result/50%25read_50%25update_RDB.png?raw=true)
 
-![50%read_50%update](https://i.postimg.cc/7ZzQt4Rt/50-read-50-update.png)
+### 90%read, 10%update, RDB on:
+![90%read_10%update_RDB](https://github.com/xuanz20/recovery-test/blob/main/result/90%25read_10%25update_RDB.png?raw=true)
 
 We crash the redis server at 30 secs, 1 min, 2 min and 4 min.
 
