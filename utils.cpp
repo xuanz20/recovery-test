@@ -34,7 +34,7 @@ double get_DB_load_time(std::string log_path) {
 void start_server(std::string conf_path = "") {
     std::string cmd = "redis-server " + conf_path + " &";
     system(cmd.c_str());
-    system("sleep 1");
+    system("sleep 5");
     return;
 }
 
