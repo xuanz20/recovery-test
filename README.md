@@ -44,7 +44,7 @@ The current data size is about 512MB with 2M key-value pairs, each pair 256B.
 ### 90%read, 10%update, RDB on:
 ![90%read_10%update_RDB](https://github.com/xuanz20/recovery-test/blob/main/result/90%25read_10%25update_RDB.png?raw=true)
 
-We crash the redis server at 1 min, 2 min and 4 min.
+We crash the redis server at 1 min, 2 min, 4 min and 8 min.
 
 ## Conclusions:
 
@@ -57,7 +57,5 @@ We crash the redis server at 1 min, 2 min and 4 min.
 + The throughput has several drops between the crashes. After examineing the redis log, it may due to the cost of saving RDB file on disk and forking new process for background saving. Note that by default, Redis will save the DB about every 1 minute and 5 minute.
 
 ## Week Plan:
-
-+ Retest the experiment. The DB loading time is longer than I expected and I reconnect to the server before it actually finishes loading, which makes the program abort. 
 
 + Test it with Phoenix as frontend.
