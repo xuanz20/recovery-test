@@ -13,9 +13,9 @@
 #include <set>
 #include <iterator>
 
-std::string conf_path = "/opt/homebrew/etc/redis.conf";
-std::string log_path = "/opt/homebrew/var/db/redis/redis.log";
-std::string dump_path = "/opt/homebrew/var/db/redis/dump.rdb";
+std::string conf_path = "/etc/redis/6379.conf";
+std::string log_path = "/var/log/redis_6379.log";
+std::string dump_path = "/var/lib/redis/6379/dump.rdb";
 
 void run(
     double,
@@ -191,13 +191,14 @@ void crash(
         std::cout << "Crash at " << sec << " seconds!" << std::endl;
         db->recovery(rdb);
         std::cout << "Recovery finishes at " << sec << " seconds!" << std::endl;
-        double time = get_DB_load_time(log_path);
-        std::cout << "DB loaded from disk: " << time << " seconds" << std::endl;
-        while (time >= 1) {
+        // double time = get_DB_load_time(log_path);
+        // std::cout << "DB loaded from disk: " << time << " seconds" << std::endl;
+        /* while (time >= 1) {
             *fout << 0 << std::endl;
             time -= 1;
-        }
+        } */
         int num = 0;
+        double time = 0;
         while (time < 1) {
             num++;
             operation(true_rate, name_list, db, test_db, &time);

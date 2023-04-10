@@ -55,12 +55,13 @@ void DB::set(std::string name, std::string ISBN)
 
 void DB::crash()
 {
-    redis_conn.command<std::string>("SHUTDOWN");
+    redis_conn.command<std::string>("BGSAVE");
 }
 
 void DB::recovery(bool rdb = false)
 {
-    start_server(conf_path);
+    // start_server(conf_path);
+    system("sleep 5");
     redis_conn = sw::redis::Redis("tcp://127.0.0.1:6379");
     if (!rdb)
         redis_conn.command("CONFIG", "SET", "save", "");

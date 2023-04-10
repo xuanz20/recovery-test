@@ -4,3 +4,5 @@ eval
 .DS_Store
 .vscode
 *.rdb
+*.png
+result
