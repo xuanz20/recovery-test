@@ -197,12 +197,13 @@ void crash(
             *fout << 0 << std::endl;
             time -= 1;
         } */
-        int num = 0;
+        /* int num = 0;
         double time = 0;
         while (time < 1) {
             num++;
             operation(true_rate, name_list, db, test_db, &time);
         }
         *fout << num << std::endl;
+        */
     }
 } 
