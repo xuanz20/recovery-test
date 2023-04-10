@@ -1,3 +1,6 @@
+module load phx
+module load userlib
+
 user=$1
 password=$2 
 
