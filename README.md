@@ -33,29 +33,19 @@ To run the codes in this repo, you should have the following:
 The current data size is about 512MB with 2M key-value pairs, each pair 256B.
 
 ### 50%read, 50%update, RDB off:
-![50%read_50%update_noRDB](https://github.com/xuanz20/recovery-test/blob/main/result/50%25read_50%25update_noRDB.png?raw=true)
+![50%read_50%update_noRDB](https://github.com/xuanz20/recovery-test/blob/phx/result/50%25read_50%25update_noRDB.png?raw=true)
 
 ### 90%read, 10%update, RDB off:
-![90%read_10%update_noRDB](https://github.com/xuanz20/recovery-test/blob/main/result/90%25read_10%25update_noRDB.png?raw=true)
-
-### 50%read, 50%update, RDB on:
-![50%read_50%update_RDB](https://github.com/xuanz20/recovery-test/blob/main/result/50%25read_50%25update_RDB.png?raw=true)
-
-### 90%read, 10%update, RDB on:
-![90%read_10%update_RDB](https://github.com/xuanz20/recovery-test/blob/main/result/90%25read_10%25update_RDB.png?raw=true)
+![90%read_10%update_noRDB](https://github.com/xuanz20/recovery-test/blob/phx/result/90%25read_10%25update_noRDB.png?raw=true)
 
 We crash the redis server at 1 min, 2 min, 4 min and 8 min.
 
 ## Conclusions:
 
-+ The recovery time is close to warm-up time, which is quite long(about 200 seconds).
-
-+ The experiment result is more stable with 90% read, 10% update than 50% read, 50% update.
-
-+ With RDB on, the performance drop comes mainly from the black out time, and the recovery performance is high.
-
-+ The throughput has several drops between the crashes. After examineing the redis log, it may due to the cost of saving RDB file on disk and forking new process for background saving. Note that by default, Redis will save the DB about every 1 minute and 5 minute.
++ The performance fluctuates a lot on the VM. We may take the key-value pair smaller.
 
 ## Week Plan:
 
-+ Test it with Phoenix as frontend.
++ Improve the existing experiment to get better result.
+
++ Read the Phoenix kernel and user api code.
