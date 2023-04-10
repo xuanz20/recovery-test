@@ -1,7 +1,7 @@
 import random
 import string
 
-NUM = 100000
+NUM = 1000000
 
 def generate_name(existing_names):
     while True:

@@ -1,6 +1,6 @@
 #define key_len 64
 #define value_len 192
-#define data_size 100000
+#define data_size 1000000
 #include "db.h"
 #include "utils.h"
 #include <assert.h>
