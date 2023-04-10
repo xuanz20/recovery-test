@@ -22,9 +22,18 @@ while len(book_pairs) < NUM:
     book_pairs.append((name, isbn))
     book_names.add(name)
 
+count = 0
 with open("data.sql", "w") as file:
     for name, isbn in book_pairs:
-        file.write(f'INSERT INTO booklist VALUES ("{name}", "{isbn}");\n')
+        if count == 0:
+            file.write("INSERT INTO booklist VALUES")
+        count += 1
+        file.write(f'("{name}", "{isbn}")')
+        if count == 1000:
+            file.write(";\n")
+            count = 0
+        else:
+            file.write(",")
 
 with open("init.txt", "w") as file:
     for name, isbn in book_pairs:
