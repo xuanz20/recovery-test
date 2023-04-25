@@ -1,7 +1,7 @@
 CPPFLAGS = -I $(CPLUS_INCLUDE_PATH) -L $(LD_LIBRARY_PATH)
-LDLIBS = -lmysqlcppconn8 -lhiredis
+LDLIBS = -lmysqlclient -lhiredis
 CXX = g++
-CXXFLAGS = -std=c++17 -pthread -O2
+CXXFLAGS = -std=c++17 -pthread -O3
 
 eval : db.cpp eval.cpp utils.cpp
 

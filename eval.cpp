@@ -1,5 +1,5 @@
-#define key_len 8
-#define value_len 24
+#define key_length 8
+#define value_length 24
 #define data_size 1000
 #include "db.h"
 #include "utils.h"
@@ -16,6 +16,8 @@
 std::string conf_path = "/etc/redis/6379.conf";
 std::string log_path = "/var/log/redis_6379.log";
 std::string dump_path = "/var/lib/redis/6379/dump.rdb";
+int key_len = key_length;
+int value_len = value_length;
 
 void run (
     double,
@@ -77,25 +79,27 @@ double get(DB* db, std::map<std::string, std::string> *test_db, std::string key)
     std::string res;
     db->get(key, &res);
     auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end - start;
+    auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     auto test_res = test_db->find(key)->second;
     if (res != test_res) {
         std::cout << "key: " << key << std::endl;
         std::cout << res << " " << test_res << std::endl;
         assert(res == test_res);
     }
-    return diff.count();
+    std::cout << "get: " << double(diff.count()) / 1e9 << std::endl;
+    return double(diff.count()) / 1e9;
 }
 
 double set(DB* db, std::map<std::string, std::string> *test_db, std::string key, std::string value) {
     auto start = std::chrono::high_resolution_clock::now();
     db->set(key, value);
     auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> diff = end - start;
+    auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     auto res = test_db->insert(make_pair(key, value)); 
     if (!res.second) 
         res.first->second = value;
-    return diff.count();
+    std::cout << "set: " << double(diff.count()) / 1e9 << std::endl;
+    return double(diff.count()) / 1e9;
 }
 
 std::string generate_value() {

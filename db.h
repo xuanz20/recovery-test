@@ -1,12 +1,13 @@
 #ifndef DB_H
 #define DB_H
-#include <mysqlx/xdevapi.h>
+#include <mysql.h>
 #include <hiredis.h>
 #include <string>
 
 class DB {
     private:
-        mysqlx::Session sess;
+        // mysqlx::Session sess;
+        MYSQL *conn;
         redisContext *ctx;
     public:
         DB(std::string, std::string);
