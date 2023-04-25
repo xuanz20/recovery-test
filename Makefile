@@ -1,8 +1,7 @@
-MYSQL_CONCPP_DIR = /usr/local/mysql/connector-c++-8.0.32
-CPPFLAGS = -I $(MYSQL_CONCPP_DIR)/include -L $(MYSQL_CONCPP_DIR)/lib64/debug
-LDLIBS = -lmysqlcppconn8 /usr/local/lib/libredis++.a /usr/local/lib/libhiredis.a
+CPPFLAGS = -I $(CPLUS_INCLUDE_PATH) -L $(LD_LIBRARY_PATH)
+LDLIBS = -lmysqlcppconn8 -lhiredis
 CXX = g++
-CXXFLAGS = -std=c++17 -pthread
+CXXFLAGS = -std=c++17 -pthread -O2
 
 eval : db.cpp eval.cpp utils.cpp
 

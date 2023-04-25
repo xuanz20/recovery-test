@@ -1,34 +1,35 @@
 import random
 import string
 
-NUM = 1000000
+key_len = 8
+value_len = 24
+NUM = 1000
 
-def generate_name(existing_names):
+def generate_key(existing_keys):
     while True:
-        name_length = 64
-        name = ''.join(random.choices(string.ascii_letters + string.digits, k=name_length))
-        if name not in existing_names:
-            return name
+        key = ''.join(random.choices(string.ascii_letters + string.digits, k=key_len))
+        if key not in existing_keys:
+            return key
 
-def generate_isbn():
-    isbn = ''.join(random.choices(string.digits, k=192))
-    return isbn
+def generate_value():
+    value = ''.join(random.choices(string.digits, k=value_len))
+    return value
 
-book_names = set()
-book_pairs = []
-while len(book_pairs) < NUM:
-    name = generate_name(book_names)
-    isbn = generate_isbn()
-    book_pairs.append((name, isbn))
-    book_names.add(name)
+key_set = set()
+kv_pair = []
+while len(kv_pair) < NUM:
+    key = generate_key(key_set)
+    value = generate_value()
+    kv_pair.append((key, value))
+    key_set.add(key)
 
 count = 0
 with open("data.sql", "w") as file:
-    for name, isbn in book_pairs:
+    for key, value in kv_pair:
         if count == 0:
-            file.write("INSERT INTO booklist VALUES")
+            file.write("INSERT INTO test_table VALUES")
         count += 1
-        file.write(f'("{name}", "{isbn}")')
+        file.write(f'("{key}", "{value}")')
         if count == 1000:
             file.write(";\n")
             count = 0
@@ -36,5 +37,5 @@ with open("data.sql", "w") as file:
             file.write(",")
 
 with open("init.txt", "w") as file:
-    for name, isbn in book_pairs:
-        file.write(f'{name},{isbn}\n')
+    for key, value in kv_pair:
+        file.write(f'{key},{value}\n')

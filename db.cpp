@@ -8,66 +8,70 @@
 
 extern std::string conf_path;
 
-DB::DB(std::string user, std::string pass, bool rdb = false): 
-sess(mysqlx::Session("localhost", 33060, user, pass)), redis_conn(sw::redis::Redis("tcp://127.0.0.1:6379"))
+DB::DB(std::string user, std::string pass) : 
+    sess(mysqlx::Session("localhost", 33060, user, pass))
 {
+    ctx = (redisContext *)redisConnect("localhost", 6379);
     sess.sql("CREATE DATABASE IF NOT EXISTS test_db").execute();
     sess.sql("USE test_db").execute();
-    sess.sql("DROP TABLE IF EXISTS booklist").execute();
+    sess.sql("DROP TABLE IF EXISTS test_table").execute();
     sess.sql(
-        "CREATE TABLE IF NOT EXISTS booklist (name CHAR(64), ISBN CHAR(192), PRIMARY KEY (name))"
+        "CREATE TABLE IF NOT EXISTS test_table (my_key CHAR(64), my_value CHAR(192), PRIMARY KEY (my_key))"
     ).execute();
     std::ifstream file("./data.sql");
     std::string line;
     while(getline(file, line)) {
         sess.sql(line).execute();
     }
-    redis_conn.flushdb();
-    if (!rdb)
-        redis_conn.command("CONFIG", "SET", "save", "");
+    redisReply *reply;
+    reply = (redisReply *)redisCommand(ctx, "FLUSHDB");
+    freeReplyObject(reply);
+    reply = (redisReply *)redisCommand(ctx, "CONFIG SET save \"\"");
+    freeReplyObject(reply);
 }
 
-std::string DB::get(std::string name)
-{
-    std::string result;
-    auto reply = redis_conn.get(name);
-    if (reply.has_value()) {
-        result = reply.value();
-    } else {
-        auto tmp = sess.sql("SELECT ISBN FROM booklist WHERE name='" + name + "'").execute().fetchOne();
+void DB::get(std::string key, std::string *value) {
+    redisReply *reply = (redisReply *)redisCommand(ctx, "GET %s", key.c_str());
+    if (reply->type == REDIS_REPLY_NIL) {
+        auto tmp = sess.sql("SELECT my_value FROM test_table WHERE my_key='" + key + "'").execute().fetchOne();
         if (tmp.isNull())
-            result = "";
+            *value = "";
         else {
-            result = std::string(tmp[0]);
-            redis_conn.set(name, result);
+            *value = std::move(std::string(tmp[0]));
+            redisCommand(ctx, "SET %s %s", key.c_str(), value->c_str());
         }
+        freeReplyObject(reply);
+        return;
+    } else if (reply->type == REDIS_REPLY_STRING) {
+        *value = std::move(reply->str);
+        freeReplyObject(reply);
+        return;
+    } else {
+        printf("Command error: %s\n", reply ? reply->str : "NULL");
+        freeReplyObject(reply);
+        return;
     }
-    return result;
 }
 
-void DB::set(std::string name, std::string ISBN)
-{
+
+void DB::set(std::string key, std::string value) {
     sess.sql(
-        "INSERT INTO booklist VALUES ('" + name + "', '" + ISBN + "') ON DUPLICATE KEY UPDATE ISBN='" + ISBN +"'"
+        "INSERT INTO test_table VALUES ('" + key + "', '" + value + "') ON DUPLICATE KEY UPDATE my_value='" + value +"'"
     ).execute();
-    redis_conn.set(name, ISBN);
+    redisCommand(ctx, "SET %s %s", key.c_str(), value.c_str());
 }
 
-void DB::crash()
-{
-    redis_conn.command<std::string>("BGSAVE");
+void DB::crash() {
+    redisCommand(ctx, "SHUTDOWN");
 }
 
-void DB::recovery(bool rdb = false)
-{
-    // start_server(conf_path);
-    system("sleep 5");
-    redis_conn = sw::redis::Redis("tcp://127.0.0.1:6379");
-    if (!rdb)
-        redis_conn.command("CONFIG", "SET", "save", "");
+void DB::recovery() {
+    start_server(conf_path);
+    ctx = (redisContext *)redisConnect("localhost", 6379);
+    redisCommand(ctx, "CONFIG SET save \"\"");
 }
 
-DB::~DB()
-{
+DB::~DB() {
     sess.close();
+    redisFree(ctx);
 }

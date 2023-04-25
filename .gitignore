@@ -1,8 +1,8 @@
 eval
+.DS_Store
 *.txt
 *.sql
-.DS_Store
-.vscode
 *.rdb
 *.png
-result
+.vscode/
+result/
